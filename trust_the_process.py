@@ -1,7 +1,7 @@
 from itertools import permutations
 from random import shuffle
 
-__version__ = "2.1.0"
+__version__ = "2.1.1"
 
 
 # Modify this for every event
