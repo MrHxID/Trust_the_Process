@@ -1,7 +1,7 @@
 from itertools import permutations
 from random import shuffle
 
-__version__ = "2.1.1"
+__version__ = "2.1.2"
 
 
 # Modify this for every event
@@ -36,9 +36,9 @@ def random_perm(n: int) -> tuple[int, ...]:
             tuple[int, ...]: Permutation ``p``.
     """
 
-    if n < 0:
+    if n < 1:
         raise ValueError(
-            f"Invalid number of participants. Expected n >= 2; got {n = }."
+            f"Invalid number of participants. Expected n >= 1; got {n = }."
         )
 
     perms = list(permutations(range(n)))
@@ -48,6 +48,9 @@ def random_perm(n: int) -> tuple[int, ...]:
         if not characteristic(p):
             break
 
+    # Pylance will complain here that p might be unbound.
+    # However, for n >= 1 there will always be at least one
+    # permutation.
     return p  # type: ignore
 
 
