@@ -1,7 +1,7 @@
-import random
 from itertools import permutations
+from random import shuffle
 
-__version__ = "2.0.0"
+__version__ = "2.1.0"
 
 
 # Modify this for every event
@@ -19,23 +19,67 @@ participants: tuple[str, ...] = (
 
 
 # These may also change in the future
-rules = ""
+with open("README.md") as readme:
+    rules = readme.read()
 
 print(rules)
 
-n = len(participants)
-l = max(len(part) for part in participants)
+
+def random_perm(n: int) -> tuple[int, ...]:
+    """Creates a random permutation ``p`` such that every element
+    has been moved to a new position.
+
+        Args:
+            n (int): Number of participants.
+
+        Returns:
+            tuple[int, ...]: Permutation ``p``.
+    """
+
+    if n < 0:
+        raise ValueError(
+            f"Invalid number of participants. Expected n >= 2; got {n = }."
+        )
+
+    perms = list(permutations(range(n)))
+    shuffle(perms)
+
+    for p in perms:
+        if not characteristic(p):
+            break
+
+    return p  # type: ignore
+
+
+def characteristic(p: list[int] | tuple[int, ...]) -> bool:
+    """Checks if the permutation ``p`` contains the number ``i``
+    at index ``i`` for all ``0 <= i < len(p)``.
+
+    Args:
+        p (list[int]): Permutation to check.
+
+    Returns:
+        bool: Whether the permutation contains an unswapped element.
+    """
+
+    for i in range(len(p)):
+        if p[i] == i:
+            return True
+
+    return False
 
 
 def main():
+    n = len(participants)
+    l = max(len(part) for part in participants)
 
-    M = create_shuffled_matrix()
+    v = range(n)
 
-    v = list(range(n))
+    p = random_perm(n)
 
     order = tuple(f"{i}." for i in range(1, n + 1))
     senders = tuple(participants[i] for i in v)
-    receivers = tuple(participants[matmul(M, v)[i]] for i in v)
+    receivers = tuple(participants[p[i]] for i in v)
 
     table_header = ("Order", "Selector", "Presenter")
     process = zip(order, senders, receivers)
@@ -62,73 +106,6 @@ def main():
         print(
             f"{p[0]:>{len(table_header[0])}} {p[1]:>{max(l, len(table_header[1]))}} -> {p[2]:>{max(l, len(table_header[2]))}}"
         )
-
-
-def matmul(M: list[list[int]], v: list[int]) -> list[int]:
-    """Perform an integer matrix-vector multiplication.
-
-    Args:
-        M (list[list[int]]): Matrix.
-        v (list[int]): Vector.
-
-    Returns:
-        list[int]: Output vector.
-    """
-
-    n = len(v)
-    out: list[int] = []
-
-    for row in M:
-        assert len(row) == n, "Shape of matrix and vector don't match."
-        out.append(sum(row[i] * v[i] for i in range(n)))
-
-    return out
-
-
-def create_shuffled_matrix() -> list[list[int]]:
-    """Creates a matrix, that has exactly one ``1`` in each
-    row and column and ``0`` otherwise.
-
-    Returns:
-        list[list[int]]: Matrix.
-    """
-
-    perms = list(permutations(range(n)))
-
-    while True:
-        p = random.choice(perms)
-
-        # Only select permutations that change the location of every
-        # element to prevent people from assigning topics to themselves.
-        if not characteristic(p):
-            break
-
-    M: list[list[int]] = []
-
-    for i in range(n):
-        row = [0] * n
-        row[p[i]] = 1
-        M.append(row)
-
-    return M
-
-
-def characteristic(p: list[int] | tuple[int, ...]) -> bool:
-    """Checks if the permutation ``v`` contains the number ``i``
-    at index ``i`` for all ``0 <= i < len(v)``.
-
-    Args:
-        p (list[int]): Permutation to check.
-
-    Returns:
-        bool: Whether the permutation contains an unswapped element.
-    """
-
-    for i in range(len(p)):
-        if p[i] == i:
-            return True
-
-    return False
 
 
 if __name__ == "__main__":
