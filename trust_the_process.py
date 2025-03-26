@@ -69,7 +69,7 @@ def characteristic(p: list[int] | tuple[int, ...]) -> bool:
     return False
 
 
-def main():
+def main() -> None:
     n = len(participants)
     l = max(len(part) for part in participants)
 
@@ -84,18 +84,15 @@ def main():
     table_header = ("Order", "Selector", "Presenter")
     process = zip(order, senders, receivers)
 
+    # Widths for formatting
+    w_order = len(table_header[0])
+    w_selector = max(l, len(table_header[1]))
+    w_presenter = max(l, len(table_header[2]))
+
     print(
-        f"{table_header[0]} {table_header[1]:>{max(l, len(table_header[1]))}}    {table_header[2]:>{max(l, len(table_header[2]))}}"
+        f"{table_header[0]} {table_header[1]:>{w_selector}}    {table_header[2]:>{w_presenter}}"
     )
-    print(
-        "="
-        * (
-            len(table_header[0])
-            + max(l, len(table_header[1]))
-            + max(l, len(table_header[2]))
-            + 5
-        )
-    )
+    print("=" * (w_order + w_selector + w_presenter + 5))
 
     for p in process:
         # Some safety features to prevent non-sensical assignments. If the program crashes
